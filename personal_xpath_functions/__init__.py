@@ -77,22 +77,27 @@ def table_mapped_keys(context: Any, *args: ValueType) -> NodeSetType:
 
     tag_name = context_node.tag
 
-    result: NodeSetType = []
     if tag_name == "table":
-        result.extend(
-            cast(
-                List[str],
-                context_node.xpath(
-                    "(./tbody | ./thead | ./tfoot | .)/tr/*[name() = 'td' or name() = 'th'][1]/text()"
-                ),
-            )
+        keys = cast(
+            List[str],
+            context_node.xpath(
+                "(./tbody | ./thead | ./tfoot | .)/tr/*[name() = 'td' or name() = 'th'][1][following-sibling::*[name() = 'td' or name() = 'th']]/text()"
+            ),
         )
     elif tag_name == "dl":
-        result.extend(cast(List[str], context_node.xpath("./dt/text()")))
+        keys = cast(
+            List[str],
+            context_node.xpath(
+                "./dt[following-sibling::*[name() = 'dd' or name() = 'dt'][1][name() = 'dd']]/text()"
+            ),
+        )
     else:
         raise ValueError(f"Unsupported element: {tag_name}")
 
-    return result
+    keys = [key.strip() for key in keys]
+    keys = [key for key in keys if 0 < len(key)]
+
+    return cast(NodeSetType, keys)
 
 
 @typechecked

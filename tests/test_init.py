@@ -112,7 +112,9 @@ def test_table_mapped_keys_and_values() -> None:
                 <tr>
                     <th>aaa</th>
                     <td>bbb</td>
+                    <td>ccc</td>
                 </tr>
+                <tr><td>111</td></tr>
             </tfoot>
         </table>
         """
@@ -127,8 +129,8 @@ def test_table_mapped_keys_and_values() -> None:
     assert values[0] == "bar"
 
     values = cast(List[str], root.xpath("table-mapped-value(//table, 'aaa')/text()"))
-    assert len(values) == 1
-    assert values[0] == "bbb"
+    assert len(values) == 2
+    assert values == ["bbb", "ccc"]
 
     root = etree.fromstring(
         """
@@ -137,6 +139,8 @@ def test_table_mapped_keys_and_values() -> None:
             <dd>bar</dd>
             <dt>aaa</dt>
             <dd>bbb</dd>
+            <dd>ccc</dd>
+            <dt>111</dt>
         </dl>
         """
     )
@@ -150,8 +154,11 @@ def test_table_mapped_keys_and_values() -> None:
     assert values[0] == "bar"
 
     values = cast(List[str], root.xpath("table-mapped-value(//dl, 'aaa')/text()"))
-    assert len(values) == 1
-    assert values[0] == "bbb"
+    assert len(values) == 2
+    assert values == ["bbb", "ccc"]
+
+    values = cast(List[str], root.xpath("table-mapped-value(//dl, '111')/text()"))
+    assert len(values) == 0
 
     root = etree.fromstring("<b>foo</b>")
     with pytest.raises(ValueError):
